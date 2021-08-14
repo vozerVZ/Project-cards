@@ -54,9 +54,20 @@ def collide_object():
 
 
 def draw_ground():
-    screen.fill([255, 255, 255])
+    screen.fill([162, 101, 62])
 
-    layout.draw(screen, screen_width, screen_height)
+    pygame.draw.rect(screen, [47, 194, 47], (0, 0, screen_width, screen_height // 5))
+    pygame.draw.rect(screen, [47, 194, 47], (0, screen_height - screen_height // 5,screen_width, screen_height // 5))
+    pygame.draw.line(screen, [0, 0, 0], [0,screen_height // 2], [screen_width, screen_height // 2], 2)
+
+    if isLayoutDrawing:
+        layout.draw(screen, screen_width, screen_height)
+
+    pygame.draw.rect(screen, [0, 0, 0], (0, 0, screen_width // 4, screen_height // 21), 2)
+    pygame.draw.rect(screen, [0, 0, 0], (screen_width // 6 * 5, 0, screen_width // 6, screen_height // 5), 2)
+
+    pygame.draw.rect(screen, [0, 0, 0], (screen_width - screen_width // 4, screen_height - screen_height // 21, screen_width // 4, screen_height // 21), 2)
+    pygame.draw.rect(screen, [0, 0, 0], (0, screen_height - screen_height // 5, screen_width // 6, screen_height // 5), 2)
 
     opponent_mana_text = font1.render(str(enemy_mana), 1, [0, 0, 255])
     screen.blit(opponent_mana_text, (screen_width // 100 * 24, screen_height // 70))
@@ -69,6 +80,21 @@ def draw_ground():
 
     player_hp_text = font1.render(str(player_hp), 1, [255, 0, 0])
     screen.blit(player_hp_text, (0, screen_height - screen_height // 5))
+
+    for i in range(10):
+        if i + 1 <= enemy_mana:
+            pygame.draw.circle(screen, [0, 0, 255], (screen_width // 85 + 35 * i, screen_height // 40), screen_width // 100)
+        elif i + 1 <= enemy_max_mana:
+            pygame.draw.circle(screen, [0, 0, 255], (screen_width // 85 + 35 * i, screen_height // 40), screen_width // 100, 2)
+        else:
+            pygame.draw.circle(screen, [79, 79, 79], (screen_width // 85 + 35 * i, screen_height // 40), screen_width // 100, 2)
+
+        if i + 1 <= player_mana:
+            pygame.draw.circle(screen, [0, 0, 255], (screen_width // 66 * 52 + 35 * i, screen_height - screen_height // 100 * 2 - 2), screen_width // 100)
+        elif i + 1 <= player_max_mana:
+            pygame.draw.circle(screen, [0, 0, 255], (screen_width // 66 * 52 + 35 * i, screen_height - screen_height // 100 * 2 - 2), screen_width // 100, 2)
+        else:
+            pygame.draw.circle(screen, [79, 79, 79], (screen_width // 66 * 52 + 35 * i, screen_height - screen_height // 100 * 2 - 2), screen_width // 100, 2)
 
     for i in range(0, len(enemy_hand)):
         enemy_hand[i].update(screen, font1, screen_width, screen_height, 0, i)
@@ -158,6 +184,7 @@ cardFrom = -1  # 0 - table 1 - hand
 
 turn = 0  # 0 - player turn 1 - opponent turn
 game_status = 0  # 0 - game 1 - player win 2 - bot win
+isLayoutDrawing = False
 
 done = False
 
