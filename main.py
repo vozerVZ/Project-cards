@@ -142,6 +142,7 @@ for i in range(3):
     enemy_deck.append(card.Card(3))
     enemy_deck.append(card.Card(4))
     enemy_deck.append(card.Card(5))
+    enemy_deck.append(card.Card(8))
 
 enemy_deck.append(card.Card(6))
 enemy_deck.append(card.Card(7))
@@ -166,6 +167,7 @@ for i in range(3):
     player_deck.append(card.Card(3))
     player_deck.append(card.Card(4))
     player_deck.append(card.Card(5))
+    player_deck.append(card.Card(8))
 
 player_deck.append(card.Card(6))
 player_deck.append(card.Card(7))
@@ -228,7 +230,7 @@ while not done:
                 obj, stat = collide_object()
                 for z in enemy_table:
                     z.set_target_status(0)
-                if isDANActivate and stat == 1 and cardFrom == 0:
+                if isDANActivate and stat == 1 and (cardFrom == 0 or (cardFrom == 1 and chosenObj.get_type() == "cast")):
                     collide_object()[0].set_target_status(2)
 
             elif i.type == pygame.MOUSEBUTTONUP:
@@ -237,7 +239,8 @@ while not done:
                     flag = True
                 if isDANActivate:
                     if not collide_check():
-                        if chosenObj.get_manacost() <= player_mana and cardFrom == 1 and len(player_table) < TABLE_MAX_SIZE:
+                        if chosenObj.get_manacost() <= player_mana and cardFrom == 1 and len(player_table) < TABLE_MAX_SIZE and chosenObj.get_type() == "creature":
+                            # Play card from hand
                             player_mana -= chosenObj.get_manacost()
                             player_table.append(chosenObj)
                             player_hand.remove(chosenObj)
@@ -245,13 +248,26 @@ while not done:
                     elif cardFrom == 0 and not chosenObj.get_attacked_status():
                         obj, stat = collide_object()
                         if stat == 4:
+                            # Attack enemy face
                             enemy_hp -= chosenObj.get_damage()
                             chosenObj.set_attacked_status(True)
                         elif stat == 1:
+                            # Attack enemy card
                             targetObj = obj
                             targetObj.damaged(chosenObj.get_damage())
                             chosenObj.damaged(targetObj.get_damage())
                             chosenObj.set_attacked_status(True)
+                    elif cardFrom == 1 and chosenObj.get_type() == "cast" and chosenObj.get_manacost() <= player_mana:
+                        obj, stat = collide_object()
+                        player_mana -= chosenObj.get_manacost()
+                        if chosenObj.get_name() == "arrow":
+                            if stat == 4:
+                                # Attack enemy face
+                                enemy_hp -= 3
+                            elif stat == 1:
+                                targetObj = obj
+                                targetObj.damaged(3)
+                                player_hand.remove(chosenObj)
 
                     chosenObj = -1
                     isDANActivate = False
@@ -330,14 +346,35 @@ while not done:
             q.set_attacked_status(True)
 
         for j in enemy_hand:
-            if len(enemy_table) >= TABLE_MAX_SIZE:
-                break
-            else:
-                curr_obj = j
-                if curr_obj.get_manacost() <= enemy_mana:
-                    enemy_mana -= curr_obj.get_manacost()
-                    enemy_table.append(curr_obj)
-                    enemy_hand.remove(curr_obj)
+            if j.get_type() == "creature":
+                if len(enemy_table) >= TABLE_MAX_SIZE:
+                    break
+                else:
+                    curr_obj = j
+                    if curr_obj.get_manacost() <= enemy_mana:
+                        enemy_mana -= curr_obj.get_manacost()
+                        enemy_table.append(curr_obj)
+                        enemy_hand.remove(curr_obj)
+                    curr_obj = -1
+            elif j.get_type() == "cast":
+                if j.get_manacost() <= enemy_mana:
+                    enemy_mana -= j.get_manacost()
+                    if j.get_name() == "arrow":
+                        number_of_choices = len(player_table)
+                        choice = random.randint(0, number_of_choices)
+                        if choice == number_of_choices:
+                            player_hp -= 3
+                        else:
+                            player_table[choice].damaged(3)
+                        enemy_hand.remove(j)
+
+            for i in enemy_table:
+                if i.get_hp() <= 0:
+                    enemy_table.remove(i)
+
+            for i in player_table:
+                if i.get_hp() <= 0:
+                    player_table.remove(i)
 
             draw_ground()
 
@@ -345,13 +382,6 @@ while not done:
             clock.tick(60)
 
             pygame.time.wait(random.randint(300, 1500))
-
-            if enemy_hp <= 0:
-                game_status = 1
-                done = True
-            elif player_hp <= 0:
-                game_status = 2
-                done = True
     #END OF BOT TURN
     for i in enemy_table:
         i.set_attacked_status(False)
