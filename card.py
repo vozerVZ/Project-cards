@@ -1,23 +1,32 @@
 import pygame
-#manacost, hp, damage
+#type, manacost, hp, damage for creature
+#type, manacost, name for cast
 cards_arr = [
-    [1, 1, 1],
-    [2, 2, 2],
-    [2, 3, 1],
-    [3, 3, 3],
-    [3, 4, 2],
-    [5, 4, 4],
-    [7, 7, 1],
-    [10, 8, 6]
+    ["creature", 1, 1, 1],
+    ["creature", 2, 2, 2],
+    ["creature", 2, 3, 1],
+    ["creature", 3, 3, 3],
+    ["creature", 3, 4, 2],
+    ["creature", 5, 4, 4],
+    ["creature", 7, 7, 1],
+    ["creature", 10, 8, 6],
+    ["cast", 2, "arrow"]
 ]
 
 
 class Card:
     def __init__(self, idd):
         self.id = idd
-        self.manacost = cards_arr[self.id][0]
-        self.hp = cards_arr[self.id][1]
-        self.damage = cards_arr[self.id][2]
+        self.type = cards_arr[self.id][0]
+        self.manacost = cards_arr[self.id][1]
+        if self.type == "creature":
+            self.hp = cards_arr[self.id][2]
+            self.damage = cards_arr[self.id][3]
+            self.name = ""
+        elif self.type == "cast":
+            self.hp = 0
+            self.damage = 0
+            self.name = cards_arr[self.id][2]
         self.status = 0  # 0 - in deck 1 - destroyed 2 - in hand 3 - on table
         self.target_status = 0  # 0 - not in target 1 - chosen 2 - target
         self.x = -1
@@ -56,22 +65,32 @@ class Card:
     def get_hp(self):
         return self.hp
 
+    def get_type(self):
+        return self.type
+
+    def get_name(self):
+        return self.name
+
     def draw(self, sc, font, sc_w, sc_h, up_down):
         pygame.draw.rect(sc, [187, 187, 187], (self.x, self.y, self.width, self.height))
 
-        if up_down == 1 or up_down == 3:
-            hp_text = font.render(str(self.hp), 1, [255, 0, 0])
-            sc.blit(hp_text, (self.x, self.y + sc_h // 6))
-            dmg_text = font.render(str(self.damage), 1, [0, 0, 0])
-            sc.blit(dmg_text, (self.x + sc_w // 16, self.y + sc_h // 6))
-            mana_text = font.render(str(self.manacost), 1, [0, 0, 255])
-            sc.blit(mana_text, (self.x, self.y))
+        if self.type == "creature":
+            if up_down == 1 or up_down == 3:
+                hp_text = font.render(str(self.hp), 1, [255, 0, 0])
+                sc.blit(hp_text, (self.x, self.y + sc_h // 6))
+                dmg_text = font.render(str(self.damage), 1, [0, 0, 0])
+                sc.blit(dmg_text, (self.x + sc_w // 16, self.y + sc_h // 6))
+                mana_text = font.render(str(self.manacost), 1, [0, 0, 255])
+                sc.blit(mana_text, (self.x, self.y))
 
-        if up_down == 2:
-            hp_text = font.render(str(self.hp), 1, [255, 0, 0])
-            sc.blit(hp_text, (self.x, self.y + sc_h // 9))
-            dmg_text = font.render(str(self.damage), 1, [0, 0, 0])
-            sc.blit(dmg_text, (self.x + sc_w // 26, self.y + sc_h // 9))
+            if up_down == 2:
+                hp_text = font.render(str(self.hp), 1, [255, 0, 0])
+                sc.blit(hp_text, (self.x, self.y + sc_h // 9))
+                dmg_text = font.render(str(self.damage), 1, [0, 0, 0])
+                sc.blit(dmg_text, (self.x + sc_w // 26, self.y + sc_h // 9))
+                mana_text = font.render(str(self.manacost), 1, [0, 0, 255])
+                sc.blit(mana_text, (self.x, self.y))
+        elif self.type == "cast" and up_down == 2:
             mana_text = font.render(str(self.manacost), 1, [0, 0, 255])
             sc.blit(mana_text, (self.x, self.y))
 
