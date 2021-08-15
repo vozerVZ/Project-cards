@@ -114,6 +114,8 @@ def draw_ground():
         pygame.draw.rect(screen, [255, 0, 51], (screen_width // 20 * 18, screen_height // 80 * 41, screen_width // 12, screen_height // 20))
 
 
+version = "Super pre-alpha"
+
 pygame.init()
 resolution = pygame.display.Info()
 screen_width = resolution.current_w
