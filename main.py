@@ -1,4 +1,4 @@
-#TYPE:DEV
+#TYPE:FROZEN
 #CODE:Project:cards
 import pygame
 import card
